@@ -13,10 +13,10 @@ const app = document.querySelector("#app");
 form.addEventListener("submit", (e) => {
     e.preventDefault();
 
-  //  console.log(headerEl.value);
+    //  console.log(headerEl.value);
 
     database.ref("notes/").push({
-    // inline object - man kan også lave en global variabel med nedenstående værdier - se test.js
+        // inline object - man kan også lave en global variabel med nedenstående værdier - se test.js
         header: headerEl.value,
         description: descriptionEl.value
     });
@@ -30,19 +30,30 @@ form.addEventListener("submit", (e) => {
 
 
 // listen for new data
-database.ref("notes/").on("child_added", (snapshot)=> {
-  //  console.log(snapshot);
-    
+database.ref("notes/").on("child_added", (snapshot) => {
+    //  console.log(snapshot);
     const key = snapshot.key;
     const data = snapshot.val();
+    // console.log(key,data);
 
-   // console.log(key,data);
-
-   const clone = template.cloneNode(true);
-   clone.querySelector("h1").textContent = data.header;
-   clone.querySelector("div.description").textContent = data.description;
-   app.appendChild(clone);
+    const clone = template.cloneNode(true);
+    clone.querySelector("article").dataset.key = key
+    clone.querySelector("h1").textContent = data.header;
+    clone.querySelector("div.description").textContent = data.description;
+    clone.querySelector("button.delete").addEventListener("click", e => {
+        database.ref("notes/" + key).remove();
+    });
+    app.appendChild(clone);
 });
+
+//listen for removal of data child_removed
+
+database.ref("notes/").on("child_removed", snapshot => {
+    console.log(snapshot.key, snapshot.val());
+    const key = snapshot.key;
+    let el = document.querySelector(`article[data-key=${key}]`);
+    el.remove();
+})
 
 
 
